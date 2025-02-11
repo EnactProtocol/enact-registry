@@ -1,0 +1,31 @@
+enact: 1.0.0
+id: "HelloWorldCapability"
+description: "A simple hello world example"
+version: 1.0.0
+type: "atomic"
+authors:
+  - name: "Example Author"
+
+inputs:
+  name:
+    type: "string"
+    description: "Name to greet"
+    default: "World"
+
+tasks:
+  - id: sayHello
+    type: "script"
+    language: "python"
+    code: |
+      name = inputs.get('name', 'World')
+      print(f"Hello, {name}!")
+
+flow:
+  steps:
+    - task: sayHello
+
+outputs:
+  type: "object"
+  properties:
+    message:
+      type: "string"

@@ -1,0 +1,42 @@
+enact: 1.0.0
+id: GetStockPrice
+description: Retrieves the current stock price for a given ticker symbol.
+version: 1.0.0
+type: atomic
+authors:
+  - name: Jane Doe
+inputs:
+  ticker: 
+    type: string
+    description: The stock ticker symbol (e.g., AAPL).
+  api_key: 
+    type: string
+    description: The API key for the stock price service.
+tasks:
+  - id: fetchPrice
+    type: script
+    language: python
+    code: |
+      import requests
+
+      ticker = inputs['ticker']
+      api_key = inputs['api_key']
+
+      url = f"https://api.stockprice.com/v1/stocks/{ticker}"  # Replace with your actual API endpoint
+      headers = {
+          "Authorization": f"Bearer {api_key}"
+      }
+
+      response = requests.get(url, headers=headers)
+      data = response.json()
+
+      price = data['price']
+      print(f"Current price of {ticker}: {price}")
+flow:
+  steps:
+    - task: fetchPrice
+outputs:
+  price: 
+    type: number
+    format: float
+    description: The current stock price.
