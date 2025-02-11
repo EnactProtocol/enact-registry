@@ -1,5 +1,5 @@
 {
-  "name": "bun-api",
+  "name": "registry-server",
   "version": "1.0.0",
   "scripts": {
     "start": "bun run src/server.ts",
@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
+    "@sinclair/typebox": "^0.34.16",
     "@types/figlet": "^1.7.0",
     "elysia": "latest",
     "figlet": "^1.8.0",
