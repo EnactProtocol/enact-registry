@@ -6,7 +6,7 @@ import { errorHandler } from './middlewares/error.middleware';
 
 const app = new Elysia()
     .use(cors({
-        origin: 'http://localhost:3000', // Your frontend URL
+        origin: 'http://localhost:3002', // Your frontend URL
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true,
     }))

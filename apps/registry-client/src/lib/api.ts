@@ -1,0 +1,43 @@
+import type { Task } from '@/types/protocol';
+
+const SERVER = "http://localhost:8080";
+
+export const api = {
+  tasks: {
+    getAll: async (): Promise<Task[]> => {
+      const response = await fetch(`${SERVER}/api/task`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.tasks;
+    },
+
+    add: async (task: Task): Promise<Task> => {
+      const response = await fetch(`${SERVER}/api/task`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(task),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.task;
+    },
+
+    delete: async (taskId: number): Promise<void> => {
+      const response = await fetch(`${SERVER}/api/task/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    },
+  },
+};

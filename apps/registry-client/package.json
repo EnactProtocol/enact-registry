@@ -63,7 +63,8 @@
     "vaul": "^0.9.3",
     "yaml": "^2.7.0",
     "zod": "^3.23.8",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "@enact/types": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

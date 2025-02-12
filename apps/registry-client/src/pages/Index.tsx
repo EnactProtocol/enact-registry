@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -247,7 +247,12 @@ const Index = () => {
   const navigate = useNavigate();
   const tasks = useTaskStore((state) => state.tasks);
   const [searchQuery, setSearchQuery] = useState("");
-
+  useEffect(() => {
+    const loadTasks = async () => {
+      await useTaskStore.getState().fetchTasks();
+    };
+    loadTasks();
+  }, []);
   const filteredTasks = useMemo(() => {
     if (!searchQuery.trim()) return tasks;
     
@@ -259,7 +264,16 @@ const Index = () => {
       return nameMatch || idMatch || descriptionMatch;
     });
   }, [tasks, searchQuery]);
-
+  const isLoading = useTaskStore((state) => state.isLoading);
+  const error = useTaskStore((state) => state.error);
+  
+  if (isLoading) {
+    return <div>Loading tasks...</div>;
+  }
+  
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
   return (
     <div className="min-h-screen bg-[#111828] scrollbar-gutter-stable">
       <div className="container mx-auto py-12">

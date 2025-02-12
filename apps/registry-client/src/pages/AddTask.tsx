@@ -189,71 +189,64 @@ const AddTask = () => {
     }
   };
 
-  
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const newTask: Task = {
-      id: 0,
-      name: values.taskId,
-      description: values.description,
-      teams: [],
-      isAtomic: true,
-      version: values.version,
-      protocolDetails: {
-        enact: "1.0.0",
-        id: values.taskId,
+    try {
+      const newTask: Task = {
+        id: 0,
         name: values.taskId,
         description: values.description,
+        teams: [],
+        isAtomic: true,
         version: values.version,
-        authors: [
-          {
-            name: values.authorName
-          }
-        ],
-        inputs: values.inputs.reduce((acc, input) => ({
-          ...acc,
-          [input.name]: {
-            type: input.type,
-            description: input.description || '',  // Make sure this is never undefined since it's required
-            ...(input.default !== undefined ? { default: input.default } : {})
-          }
-        }), {} as Record<string, InputConfig>),
-        tasks: [
-          {
-            id: values.taskId,
-            type: values.taskType,
-            language: values.taskLanguage,
-            code: values.taskCode
-          }
-        ],
-        flow: {
-          steps: [{ task: values.taskId }]
-        },
-        outputs: {
-          type: "object",
-          properties: values.outputProperties.reduce((acc, prop) => ({
-            ...acc,
-            [prop.name]: {
-              type: prop.type,
-              ...(prop.description ? { description: prop.description } : {})
+        protocolDetails: {
+          enact: "1.0.0",
+          id: values.taskId,
+          name: values.taskId,
+          description: values.description,
+          version: values.version,
+          authors: [
+            {
+              name: values.authorName
             }
-          }), {} as Record<string, { type: string; description?: string }>)
+          ],
+          inputs: values.inputs.reduce((acc, input) => ({
+            ...acc,
+            [input.name]: {
+              type: input.type,
+              description: input.description || '',  // Make sure this is never undefined since it's required
+              ...(input.default !== undefined ? { default: input.default } : {})
+            }
+          }), {} as Record<string, InputConfig>),
+          tasks: [
+            {
+              id: values.taskId,
+              type: values.taskType,
+              language: values.taskLanguage,
+              code: values.taskCode
+            }
+          ],
+          flow: {
+            steps: [{ task: values.taskId }]
+          },
+          outputs: {
+            type: "object",
+            properties: values.outputProperties.reduce((acc, prop) => ({
+              ...acc,
+              [prop.name]: {
+                type: prop.type,
+                ...(prop.description ? { description: prop.description } : {})
+              }
+            }), {} as Record<string, { type: string; description?: string }>)
+          }
         }
-      }
-    };
-
-    const response = await fetch(`${SERVER}/api/task/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newTask),
-    });
-    const result = await response.json();
-    if (!response.ok) {
-      toast.error("Error creating task: " + result.error);
-      return;
+      };
+  
+      await addTask(newTask);
+      toast.success("Task created successfully!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Failed to create task: " + (error instanceof Error ? error.message : 'Unknown error'));
     }
-    addTask(newTask);
-    toast.success("Task created successfully!");
-    navigate("/");
   };
 
   const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
