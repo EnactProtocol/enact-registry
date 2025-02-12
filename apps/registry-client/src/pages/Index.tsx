@@ -254,15 +254,20 @@ const Index = () => {
     loadTasks();
   }, []);
   const filteredTasks = useMemo(() => {
-    if (!searchQuery.trim()) return tasks;
-    
     const query = searchQuery.toLowerCase().trim();
-    return tasks.filter((task) => {
-      const nameMatch = task.name.toLowerCase().includes(query);
-      const idMatch = task.protocolDetails.id.toLowerCase().includes(query);
-      const descriptionMatch = task.description.toLowerCase().includes(query);
-      return nameMatch || idMatch || descriptionMatch;
-    });
+  
+    const filtered = !query
+      ? tasks
+      : tasks.filter((task) => {
+          const nameMatch = task.name.toLowerCase().includes(query);
+          const idMatch = task.protocolDetails.id.toLowerCase().includes(query);
+          const descriptionMatch = task.description.toLowerCase().includes(query);
+          return nameMatch || idMatch || descriptionMatch;
+        });
+  
+    return filtered.filter((task, index, self) =>
+      index === self.findIndex((t) => t.id === task.id)
+    );
   }, [tasks, searchQuery]);
   const isLoading = useTaskStore((state) => state.isLoading);
   const error = useTaskStore((state) => state.error);
