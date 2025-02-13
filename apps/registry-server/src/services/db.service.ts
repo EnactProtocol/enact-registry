@@ -97,72 +97,91 @@ export class DatabaseService {
 
   async getAllCapabilities() {
     try {
-      // Update query to include content field
-      const capabilities = this.db.prepare(`
-        SELECT id, description, version, type, content
-        FROM capabilities
-      `).all();
-      
-      return capabilities.map((cap: any) => {
-        try {
-          // Parse the stored content if it exists
-          const content = cap.content ? JSON.parse(cap.content) : null;
-          
-          return {
-            id: cap.id,
-            description: cap.description,
-            version: cap.version || '1.0.0',
-            type: cap.type || 'atomic',
-            protocolDetails: content ? {
-              enact: content.enact || '1.0.0',
-              id: content.id || cap.id,
-              name: content.name || cap.id,
-              description: content.description || cap.description,
-              version: content.version || cap.version || '1.0.0',
-              authors: content.authors || [],
-              inputs: content.inputs || {},
-              tasks: content.tasks || [],
-              flow: content.flow || { steps: [] },
-              outputs: content.outputs || { type: 'object', properties: {} }
-            } : {
-              enact: '1.0.0',
-              id: cap.id,
-              name: cap.id,
-              description: cap.description,
-              version: cap.version || '1.0.0',
-              authors: [],
-              inputs: {},
-              tasks: [],
-              flow: { steps: [] },
-              outputs: { type: 'object', properties: {} }
+        const capabilities = this.db.prepare(`
+            SELECT id, description, version, type, content
+            FROM capabilities
+        `).all();
+        
+        console.log('Raw capabilities from DB:', capabilities);
+        
+        return capabilities.map((cap: any) => {
+            try {
+                const content = cap.content ? JSON.parse(cap.content) : null;
+                console.log('Parsed content for cap:', cap.id, content);
+                
+                // If we have no content, early return with safe defaults
+                if (!content) {
+                    return {
+                        id: cap.id || 0,  // Ensure we have some ID
+                        name: cap.id || 'Unnamed Task',
+                        description: cap.description || '',
+                        version: cap.version || '1.0.0',
+                        teams: [],
+                        isAtomic: true,
+                        protocolDetails: {
+                            enact: '1.0.0',
+                            id: cap.id || 'unnamed',
+                            name: cap.id || 'Unnamed Task',
+                            description: cap.description || '',
+                            version: cap.version || '1.0.0',
+                            authors: [],
+                            inputs: {},
+                            tasks: [],
+                            flow: { steps: [] },
+                            outputs: {}
+                        }
+                    };
+                }
+
+                // If we have content, use it but with fallbacks
+                return {
+                    id: content.id || cap.id || 0,
+                    name: content.id || cap.id || 'Unnamed Task',
+                    description: content.description || cap.description || '',
+                    version: content.version || cap.version || '1.0.0',
+                    teams: [],
+                    isAtomic: content.type === 'atomic' || true,
+                    protocolDetails: {
+                        enact: content.enact || '1.0.0',
+                        id: content.id || cap.id || 'unnamed',
+                        name: content.id || cap.id || 'Unnamed Task',
+                        description: content.description || cap.description || '',
+                        version: content.version || cap.version || '1.0.0',
+                        authors: content.authors || [],
+                        inputs: content.inputs || {},
+                        tasks: content.tasks || [],
+                        flow: content.flow || { steps: [] },
+                        outputs: content.outputs || {}
+                    }
+                };
+            } catch (parseError) {
+                console.error(`Error parsing content for capability ${cap.id}:`, parseError);
+                // Return safe defaults on parse error
+                return {
+                    id: cap.id || 0,
+                    name: cap.id || 'Unnamed Task',
+                    description: cap.description || '',
+                    version: cap.version || '1.0.0',
+                    teams: [],
+                    isAtomic: true,
+                    protocolDetails: {
+                        enact: '1.0.0',
+                        id: cap.id || 'unnamed',
+                        name: cap.id || 'Unnamed Task',
+                        description: cap.description || '',
+                        version: cap.version || '1.0.0',
+                        authors: [],
+                        inputs: {},
+                        tasks: [],
+                        flow: { steps: [] },
+                        outputs: {}
+                    }
+                };
             }
-          };
-        } catch (parseError) {
-          console.error(`Error parsing content for capability ${cap.id}:`, parseError);
-          // Return a safely structured object even if parsing fails
-          return {
-            id: cap.id,
-            description: cap.description,
-            version: cap.version || '1.0.0',
-            type: cap.type || 'atomic',
-            protocolDetails: {
-              enact: '1.0.0',
-              id: cap.id,
-              name: cap.id,
-              description: cap.description,
-              version: cap.version || '1.0.0',
-              authors: [],
-              inputs: {},
-              tasks: [],
-              flow: { steps: [] },
-              outputs: { type: 'object', properties: {} }
-            }
-          };
-        }
-      });
+        });
     } catch (error) {
-      console.error('Error getting capabilities:', error);
-      return [];
+        console.error('Error getting capabilities:', error);
+        return [];
     }
-  }
+} 
 }

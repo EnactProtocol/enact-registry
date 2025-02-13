@@ -34,10 +34,7 @@ export type ProtocolDetails = {
   flow: {
     steps: FlowStep[];
   };      
-  outputs: {
-    type: string;
-    properties: Record<string, { type: string; description?: string }>;
-  };
+  outputs: Record<string, InputConfig>;
 };
 
 export type Task = {

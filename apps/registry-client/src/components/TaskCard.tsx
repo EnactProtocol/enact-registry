@@ -27,11 +27,8 @@ interface Flow {
 
 interface Output {
   type: string;
-  properties: {
-    [key: string]: {
-      type: string;
-    };
-  };
+  description: string;
+  default?: string;
 }
 
 interface TaskCardProps {
@@ -47,7 +44,7 @@ interface TaskCardProps {
     inputs: { [key: string]: Input };
     tasks: Task[];
     flow: Flow;
-    outputs: Output;
+    outputs: { [key: string]: Output };  
   };
 }
 
@@ -126,7 +123,7 @@ export const TaskCard = ({
               Inputs
             </h4>
             <div className="space-y-3">
-              {Object.entries(protocolDetails.inputs).map(([key, input]) => (
+              {protocolDetails?.inputs && Object.entries(protocolDetails.inputs).map(([key, input]) => (
                 <div key={key} className="bg-enact-bg/50 p-4 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm font-medium text-enact-accent">{key}</span>
@@ -192,27 +189,31 @@ export const TaskCard = ({
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-enact-text flex items-center gap-2">
-              <span className="i-lucide-box text-enact-accent" />
-              Outputs
-            </h4>
-            <div className="bg-enact-bg/50 p-4 rounded-lg">
-              <p className="text-sm text-gray-400 mb-3">Type: <span className="text-enact-accent">{protocolDetails.outputs.type}</span></p>
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-enact-text">Properties:</p>
-                {Object.entries(protocolDetails.outputs.properties).map(([key, prop]) => (
-                  <div key={key} className="flex items-center gap-2 pl-4">
-                    <span className="text-sm text-enact-accent">{key}</span>
-                    <span className="px-2 py-0.5 text-xs rounded-full bg-enact-accent/10 text-enact-accent">
-                      {prop.type}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+  <h4 className="text-sm font-medium text-enact-text flex items-center gap-2">
+    <span className="i-lucide-box text-enact-accent" />
+    Outputs
+  </h4>
+  <div className="space-y-3">
+    {protocolDetails?.outputs &&  Object.entries(protocolDetails.outputs).map(([key, output]) => (
+      <div key={key} className="bg-enact-bg/50 p-4 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm font-medium text-enact-accent">{key}</span>
+          <span className="px-2 py-0.5 text-xs rounded-full bg-enact-accent/10 text-enact-accent">
+            {output.type}
+          </span>
+        </div>
+        <p className="text-sm text-gray-400 mb-2">{output.description}</p>
+        {output.default && (
+          <p className="text-sm text-gray-400">
+            Default: <span className="text-enact-accent">{output.default}</span>
+          </p>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
         </div>
       )}
     </div>
-  );
+  );  
 };

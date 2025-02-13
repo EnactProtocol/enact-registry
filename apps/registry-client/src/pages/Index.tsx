@@ -56,12 +56,12 @@ const TaskCard = ({ task }: { task: Task }) => {
             <div className="h-px bg-gray-400/30 mt-4" />
             {/* Inputs Section */}
             <div>
-              <h3 className="text-gray-900 font-medium mb-2 flex items-center gap-2">
-                <Icon icon="mdi:input" className="w-4 h-4 text-black" />
-                Inputs <span className="text-black">({Object.keys(task.protocolDetails.inputs).length})</span>
-              </h3>
-              <div className="space-y-2">
-                {Object.entries(task.protocolDetails.inputs).map(([key, input]) => (
+            <h3 className="text-gray-900 font-medium mb-2 flex items-center gap-2">
+          <Icon icon="mdi:input" className="w-4 h-4 text-black" />
+          Inputs <span className="text-black">({Object.keys(task.protocolDetails?.inputs || {}).length})</span>
+        </h3>
+        <div className="space-y-2">
+          {task.protocolDetails?.inputs && Object.entries(task.protocolDetails.inputs).map(([key, input]) => (
                   <div key={key} className="bg-[#BCBCBC] rounded-md p-2">
                     <div className="flex items-start gap-2">
                       <div className="flex-1">
@@ -135,29 +135,27 @@ const TaskCard = ({ task }: { task: Task }) => {
             </div>
 
             {/* Outputs Section */}
-            <div>
-              <h3 className="text-gray-900 font-medium mb-2 flex items-center gap-2">
-                <Icon icon="mdi:output" className="w-4 h-4 text-black" />
-                Outputs <span className="text-black">({Object.keys(task.protocolDetails.outputs.properties).length})</span>
-              </h3>
-              <div className="space-y-2">
-                {Object.entries(task.protocolDetails.outputs.properties).map(([key, output]) => (
-                  <div key={key} className="bg-[#BCBCBC] rounded-md p-2">
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <code className="text-base font-mono text-black">{key}</code>
-                          <Badge variant="outline" className="bg-blue-100 text-blue-700 rounded border-blue-700 px-2 py-0.5 text-xs font-medium pointer-events-none">{output.type}</Badge>
-                        </div>
-                        {output.description && (
-                          <p className="text-sm text-gray-600">{output.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <h3 className="text-gray-900 font-medium mb-2 flex items-center gap-2">
+  <Icon icon="mdi:output" className="w-4 h-4 text-black" />
+  Outputs <span className="text-black">({Object.keys(task.protocolDetails?.outputs || {}).length})</span>
+</h3>
+<div className="space-y-2">
+  {task.protocolDetails?.outputs && Object.entries(task.protocolDetails.outputs).map(([key, output]) => (
+    <div key={key} className="bg-[#BCBCBC] rounded-md p-2">
+      <div className="flex items-start gap-2">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <code className="text-base font-mono text-black">{key}</code>
+            <Badge variant="outline" className="bg-blue-100 text-blue-700 rounded border-blue-700 px-2 py-0.5 text-xs font-medium pointer-events-none">{output.type}</Badge>
+          </div>
+          {output.description && (
+            <p className="text-sm text-gray-600">{output.description}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
             <div className="h-px bg-gray-400/30 mt-4" />
             <div className="flex items-center gap-2 mt-4">
               <Button

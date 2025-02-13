@@ -29,10 +29,11 @@ const formSchema = z.object({
   taskType: z.string().min(1, "Task type is required"),
   taskLanguage: z.string().min(1, "Task language is required"),
   taskCode: z.string().min(1, "Task code is required"),
-  outputProperties: z.array(z.object({
-    name: z.string().min(1, "Property name is required"),
-    type: z.string().min(1, "Property type is required"),
-    description: z.string().optional(),
+  outputs: z.array(z.object({
+    name: z.string().min(1, "Output name is required"),
+    type: z.string().min(1, "Output type is required"),
+    description: z.string().min(1, "Output description is required"),
+    default: z.string().optional(),
   })),
 });
 
@@ -52,7 +53,7 @@ const AddTask = () => {
       taskType: "script",
       taskLanguage: "python",
       taskCode: "",
-      outputProperties: [{ name: "", type: "string", description: "" }],
+      outputs: [{ name: "", type: "string", description: "" }],
     },
   });
 
@@ -61,9 +62,8 @@ const AddTask = () => {
     name: "inputs"
   });
 
-  const { fields: outputPropertyFields, append: appendOutputProperty, remove: removeOutputProperty } = useFieldArray({
-    control: form.control,
-    name: "outputProperties"
+  const { fields: outputFields, append: appendOutput, remove: removeOutput } = useFieldArray({    control: form.control,
+    name: "outputs"
   });
 
   const SERVER = "http://localhost:8080";
@@ -127,10 +127,7 @@ const AddTask = () => {
               dependencies: step.dependencies
             }))
           },
-          outputs: {
-            type: yamlContent.outputs?.type || "object",
-            properties: yamlContent.outputs?.properties || {}
-          }
+          outputs: yamlContent.outputs || {},
         },
         version: ""
       };
@@ -170,14 +167,15 @@ const AddTask = () => {
       }
 
       // Set the first output if it exists
-      const outputKeys = Object.keys(taskData.protocolDetails.outputs.properties);
+      const outputKeys = Object.keys(taskData.protocolDetails.outputs);
       if (outputKeys.length > 0) {
         const firstOutputKey = outputKeys[0];
-        const firstOutput = taskData.protocolDetails.outputs.properties[firstOutputKey];
-        form.setValue('outputProperties', [{
+        const firstOutput = taskData.protocolDetails.outputs[firstOutputKey];
+        form.setValue('outputs', [{
           name: firstOutputKey,
           type: firstOutput.type,
-          description: firstOutput.description || ''
+          description: firstOutput.description,
+          default: firstOutput.default
         }]);
       }
 
@@ -228,16 +226,14 @@ const AddTask = () => {
           flow: {
             steps: [{ task: values.taskId }]
           },
-          outputs: {
-            type: "object",
-            properties: values.outputProperties.reduce((acc, prop) => ({
-              ...acc,
-              [prop.name]: {
-                type: prop.type,
-                ...(prop.description ? { description: prop.description } : {})
-              }
-            }), {} as Record<string, { type: string; description?: string }>)
-          }
+          outputs: values.outputs.reduce((acc, input) => ({
+            ...acc,
+            [input.name]: {
+              type: input.type,
+              description: input.description || '',  // Make sure this is never undefined since it's required
+              ...(input.default !== undefined ? { default: input.default } : {})
+            }
+          }), {} as Record<string, InputConfig>),
         }
       };
   
@@ -580,7 +576,7 @@ const AddTask = () => {
                             <p className="text-white text-sm mb-2">Output Type: object</p>
                             <p className="text-gray-400 text-xs mb-4">This task's output will be an object with the following properties:</p>
                           </div>
-                          {outputPropertyFields.map((field, index) => (
+                          {outputFields.map((field, index) => (
                             <div key={field.id} className="space-y-4 p-4 border border-white/20 rounded-lg">
                               <div className="flex justify-between items-center">
                                 <h4 className="text-white text-sm font-medium">Property {index + 1}</h4>
@@ -589,7 +585,7 @@ const AddTask = () => {
                                     type="button"
                                     variant="destructive"
                                     size="sm"
-                                    onClick={() => removeOutputProperty(index)}
+                                    onClick={() => removeOutput(index)}
                                   >
                                     Remove
                                   </Button>
@@ -597,7 +593,7 @@ const AddTask = () => {
                               </div>
                               <FormField
                                 control={form.control}
-                                name={`outputProperties.${index}.name`}
+                                name={`outputs.${index}.name`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className="text-white">Property Name</FormLabel>
@@ -610,7 +606,7 @@ const AddTask = () => {
                               />
                               <FormField
                                 control={form.control}
-                                name={`outputProperties.${index}.type`}
+                                name={`outputs.${index}.type`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className="text-white">Property Type</FormLabel>
@@ -623,7 +619,7 @@ const AddTask = () => {
                               />
                               <FormField
                                 control={form.control}
-                                name={`outputProperties.${index}.description`}
+                                name={`outputs.${index}.description`}
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel className="text-white">Description (Optional)</FormLabel>
@@ -640,7 +636,7 @@ const AddTask = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => appendOutputProperty({ name: "", type: "string", description: "" })}
+                            onClick={() => appendOutput({ name: "", type: "string", description: "", default: "" })}
                             className="mt-2"
                           >
                             Add Property
