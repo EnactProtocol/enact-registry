@@ -39,6 +39,7 @@ export class DatabaseService {
   }
 
   async storeCapability(capability: ProcessedCapability, yamlContent: string) {
+    console.log('Storing capability:', capability,"content",yamlContent);
     const { id, description, version, type, embedding } = capability;
     
     // Convert embedding array to JSON string
@@ -97,91 +98,74 @@ export class DatabaseService {
 
   async getAllCapabilities() {
     try {
-        const capabilities = this.db.prepare(`
-            SELECT id, description, version, type, content
-            FROM capabilities
-        `).all();
-        
-        console.log('Raw capabilities from DB:', capabilities);
-        
-        return capabilities.map((cap: any) => {
-            try {
-                const content = cap.content ? JSON.parse(cap.content) : null;
-                console.log('Parsed content for cap:', cap.id, content);
-                
-                // If we have no content, early return with safe defaults
-                if (!content) {
-                    return {
-                        id: cap.id || 0,  // Ensure we have some ID
-                        name: cap.id || 'Unnamed Task',
-                        description: cap.description || '',
-                        version: cap.version || '1.0.0',
-                        teams: [],
-                        isAtomic: true,
-                        protocolDetails: {
-                            enact: '1.0.0',
-                            id: cap.id || 'unnamed',
-                            name: cap.id || 'Unnamed Task',
-                            description: cap.description || '',
-                            version: cap.version || '1.0.0',
-                            authors: [],
-                            inputs: {},
-                            tasks: [],
-                            flow: { steps: [] },
-                            outputs: {}
-                        }
-                    };
-                }
+      const capabilities = this.db.prepare(`
+        SELECT id, description, version, type, content
+        FROM capabilities
+      `).all();
+      
+      return capabilities.map((cap: any) => {
 
-                // If we have content, use it but with fallbacks
-                return {
-                    id: content.id || cap.id || 0,
-                    name: content.id || cap.id || 'Unnamed Task',
-                    description: content.description || cap.description || '',
-                    version: content.version || cap.version || '1.0.0',
-                    teams: [],
-                    isAtomic: content.type === 'atomic' || true,
-                    protocolDetails: {
-                        enact: content.enact || '1.0.0',
-                        id: content.id || cap.id || 'unnamed',
-                        name: content.id || cap.id || 'Unnamed Task',
-                        description: content.description || cap.description || '',
-                        version: content.version || cap.version || '1.0.0',
-                        authors: content.authors || [],
-                        inputs: content.inputs || {},
-                        tasks: content.tasks || [],
-                        flow: content.flow || { steps: [] },
-                        outputs: content.outputs || {}
-                    }
-                };
-            } catch (parseError) {
-                console.error(`Error parsing content for capability ${cap.id}:`, parseError);
-                // Return safe defaults on parse error
-                return {
-                    id: cap.id || 0,
-                    name: cap.id || 'Unnamed Task',
-                    description: cap.description || '',
-                    version: cap.version || '1.0.0',
-                    teams: [],
-                    isAtomic: true,
-                    protocolDetails: {
-                        enact: '1.0.0',
-                        id: cap.id || 'unnamed',
-                        name: cap.id || 'Unnamed Task',
-                        description: cap.description || '',
-                        version: cap.version || '1.0.0',
-                        authors: [],
-                        inputs: {},
-                        tasks: [],
-                        flow: { steps: [] },
-                        outputs: {}
-                    }
-                };
+        try {
+          // Parse the stored JSON content
+          console.log("cap",cap);
+          const content = cap.content ? JSON.parse(cap.content) : null;
+          
+          if (!content) {
+            return this.createDefaultCapability(cap);
+          }
+
+          // Return the complete stored structure
+          return {
+            id: content.id,
+            name: content.name,
+            description: content.description,
+            version: content.version,
+            teams: content.teams || [],
+            isAtomic: content.type === 'atomic',
+            protocolDetails: {
+              enact: content.protocolDetails.enact,
+              id: content.protocolDetails.id,
+              name: content.protocolDetails.name,
+              description: content.protocolDetails.description,
+              version: content.protocolDetails.version,
+              authors: content.protocolDetails.authors,
+              inputs: content.protocolDetails.inputs,
+              tasks: content.protocolDetails.tasks,
+              flow: content.protocolDetails.flow,
+              outputs: content.protocolDetails.outputs
             }
-        });
+          };
+        } catch (parseError) {
+          console.error(`Error parsing content for capability ${cap.id}:`, parseError);
+          return this.createDefaultCapability(cap);
+        }
+      });
     } catch (error) {
-        console.error('Error getting capabilities:', error);
-        return [];
+      console.error('Error getting capabilities:', error);
+      return [];
     }
-} 
+  }
+
+  private createDefaultCapability(cap: any) {
+    return {
+      id: cap.id || 0,
+      name: cap.id || 'Unnamed Task',
+      description: cap.description || '',
+      version: cap.version || '1.0.0',
+      teams: [],
+      isAtomic: true,
+      protocolDetails: {
+        enact: '1.0.0',
+        id: cap.id || 'unnamed',
+        name: cap.id || 'Unnamed Task',
+        description: cap.description || '',
+        version: cap.version || '1.0.0',
+        authors: [],
+        inputs: {},
+        tasks: [],
+        flow: { steps: [] },
+        outputs: {}
+      }
+    };
+  } 
 }

@@ -33,10 +33,10 @@ flow:
     - task: sayHello
 
 outputs:
-  type: "object"
-  properties:
-    message:
-      type: "string"`;
+   name:
+    type: "string"
+    description: "Name to greet"
+    default: "World"`
 
 const TaskTemplate = () => {
   const navigate = useNavigate();

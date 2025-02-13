@@ -19,9 +19,22 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-
-const TaskCard = ({ task }: { task: Task }) => {
+const EnactCard = ({ task }: { task: Task }) => {
   const removeTask = useTaskStore((state) => state.removeTask);
+
+  // Ensure protocolDetails exists before accessing
+  if (!task?.protocolDetails) {
+    return null; // or return an error state card
+  }
+
+  const { 
+    enact = "", 
+    authors = [], 
+    inputs = {}, 
+    outputs = {}, 
+    tasks = [], 
+    flow = { steps: [] } 
+  } = task.protocolDetails;
 
   return (
     <Card className="mb-4 bg-[#ddddde]">
@@ -40,12 +53,24 @@ const TaskCard = ({ task }: { task: Task }) => {
               </div>
               <CardDescription className="mt-1 text-gray-800 -ml-6">{task.description}</CardDescription>
               <div className="flex items-center gap-2 mt-3 -ml-7">
-                <Badge variant="secondary" className="bg-[#111729] text-gray-200 font-medium border border-gray-200 pointer-events-none">ENACT v{task.protocolDetails.enact}</Badge>
-                {task.isAtomic && (
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-700 border border-purple-700 pointer-events-none">atomic</Badge>
+                {enact && (
+                  <Badge variant="secondary" className="bg-[#111729] text-gray-200 font-medium border border-gray-200 pointer-events-none">
+                    ENACT v{enact}
+                  </Badge>
                 )}
-                {task.protocolDetails.authors.map((author) => (
-                  <Badge key={author.name} variant="secondary" className="bg-[#BCBCBC] text-gray-700 border border-gray-700 pointer-events-none">@{author.name}</Badge>
+                {task.isAtomic && (
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-700 border border-purple-700 pointer-events-none">
+                    atomic
+                  </Badge>
+                )}
+                {authors.map((author) => (
+                  <Badge 
+                    key={author.name} 
+                    variant="secondary" 
+                    className="bg-[#BCBCBC] text-gray-700 border border-gray-700 pointer-events-none"
+                  >
+                    @{author.name}
+                  </Badge>
                 ))}
               </div>
             </div>
@@ -253,18 +278,21 @@ const Index = () => {
   }, []);
   const filteredTasks = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-  
+    console.log('tasks', tasks);
+    if(!tasks) return [];
     const filtered = !query
       ? tasks
       : tasks.filter((task) => {
-          const nameMatch = task.name.toLowerCase().includes(query);
-          const idMatch = task.protocolDetails.id.toLowerCase().includes(query);
-          const descriptionMatch = task.description.toLowerCase().includes(query);
+          // Safely access properties with optional chaining
+          const nameMatch = task?.name?.toLowerCase()?.includes(query) ?? false;
+          const idMatch = task?.protocolDetails?.id?.toLowerCase()?.includes(query) ?? false;
+          const descriptionMatch = task?.description?.toLowerCase()?.includes(query) ?? false;
           return nameMatch || idMatch || descriptionMatch;
         });
-  
+    console.log('filtered', filtered);
+    // Deduplicate based on id
     return filtered.filter((task, index, self) =>
-      index === self.findIndex((t) => t.id === task.id)
+      index === self.findIndex((t) => t?.id === task?.id)
     );
   }, [tasks, searchQuery]);
   const isLoading = useTaskStore((state) => state.isLoading);
@@ -311,7 +339,7 @@ const Index = () => {
               </div>
             ) : (
               filteredTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
+                <EnactCard key={task.id} task={task} />
               ))
             )}
           </div>

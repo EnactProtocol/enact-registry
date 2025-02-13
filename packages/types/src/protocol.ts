@@ -40,9 +40,7 @@ export interface Author {
     inputs: Record<string, Input>;
     tasks: Task[];
     flow: Flow;
-    outputs: {
-      properties: Record<string, Output>;
-    };
+    outputs: Record<string, Output>; 
   }
   
   export interface TaskData {

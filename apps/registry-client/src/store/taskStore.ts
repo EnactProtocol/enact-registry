@@ -1,5 +1,6 @@
+// Modified addTask function for TaskStore
 import { create } from 'zustand';
-import type { Task } from '@/types/protocol';
+import type { Task, InputConfig } from '@/types/protocol';
 import { api } from '@/lib/api';
 
 interface TaskStore {
@@ -20,6 +21,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const tasks = await api.tasks.getAll();
+      console.log('fetchTasks:', tasks);
       set({ tasks, isLoading: false });
     } catch (error) {
       set({ 
@@ -30,12 +32,21 @@ export const useTaskStore = create<TaskStore>((set) => ({
     }
   },
 
-  addTask: async (task: Task) => {
+  addTask: async (taskData: Task) => {
+    console.log('sending taskData:', taskData);
     set({ isLoading: true, error: null });
     try {
+      // Ensure inputs and outputs are properly structured
+      const task: Task = {
+        ...taskData,
+        protocolDetails: {
+          ...taskData.protocolDetails,
+        }
+      };
+
       const newTask = await api.tasks.add(task);
       set((state) => ({ 
-        tasks: [...state.tasks, newTask],
+        tasks: state.tasks ? [...state.tasks, newTask]: [newTask],
         isLoading: false 
       }));
     } catch (error) {

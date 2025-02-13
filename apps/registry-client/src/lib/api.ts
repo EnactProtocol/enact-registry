@@ -10,7 +10,8 @@ export const api = {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      return data.tasks;
+      console.log('data:', data);
+      return data;
     },
 
     add: async (task: Task): Promise<Task> => {

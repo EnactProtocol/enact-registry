@@ -37,7 +37,7 @@ const formSchema = z.object({
   })),
 });
 
-const AddTask = () => {
+const TaskForm = () => {
   const navigate = useNavigate();
   const addTask = useTaskStore((state) => state.addTask);
   
@@ -75,6 +75,7 @@ const AddTask = () => {
    */
   const handleYamlUpload = async (content: string) => {
     try {
+      console.log('sending content:', content);
       // Send the YAML content directly
       const response = await fetch(`${SERVER}/api/yaml/process`, {
         method: 'POST',
@@ -145,17 +146,19 @@ const AddTask = () => {
       }
 
       // Set the first input if it exists
-      const inputKeys = Object.keys(taskData.protocolDetails.inputs);
-      if (inputKeys.length > 0) {
-        const firstInputKey = inputKeys[0];
-        const firstInput = taskData.protocolDetails.inputs[firstInputKey];
-        form.setValue('inputs', [{
-          name: firstInputKey,
-          type: firstInput.type,
-          description: firstInput.description,
-          default: firstInput.default
-        }]);
-      }
+      // Set all inputs
+const inputKeys = Object.keys(taskData.protocolDetails.inputs);
+const inputsArray = inputKeys.map(key => {
+  const input = taskData.protocolDetails.inputs[key];
+  return {
+    name: key,
+    type: input.type,
+    description: input.description,
+    default: input.default || ''
+  };
+});
+form.setValue('inputs', inputsArray);
+
 
       // Set the first task if it exists
       if (taskData.protocolDetails.tasks?.[0]) {
@@ -166,18 +169,19 @@ const AddTask = () => {
         form.setValue('taskCode', firstTask.code || '');
       }
 
-      // Set the first output if it exists
-      const outputKeys = Object.keys(taskData.protocolDetails.outputs);
-      if (outputKeys.length > 0) {
-        const firstOutputKey = outputKeys[0];
-        const firstOutput = taskData.protocolDetails.outputs[firstOutputKey];
-        form.setValue('outputs', [{
-          name: firstOutputKey,
-          type: firstOutput.type,
-          description: firstOutput.description,
-          default: firstOutput.default
-        }]);
-      }
+// Set all outputs
+const outputKeys = Object.keys(taskData.protocolDetails.outputs);
+const outputsArray = outputKeys.map(key => {
+  const output = taskData.protocolDetails.outputs[key];
+  return {
+    name: key,
+    type: output.type,
+    description: output.description,
+    default: output.default || ''
+  };
+});
+form.setValue('outputs', outputsArray);
+
 
       toast.success('YAML loaded and processed successfully');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -186,15 +190,37 @@ const AddTask = () => {
       toast.error('Failed to process YAML file. Please check the format.');
     }
   };
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Convert inputs array to the correct InputConfig format
+      const inputsObject: Record<string, InputConfig> = {};
+      values.inputs.forEach((input) => {
+        inputsObject[input.name] = {
+          type: input.type,
+          description: input.description,
+          ...(input.default ? { default: input.default } : {})
+        };
+      });
+      console.log("inputsObject", inputsObject);
+  
+      // Convert outputs array to the correct InputConfig format
+      const outputsObject: Record<string, InputConfig> = {};
+      values.outputs.forEach((output) => {
+        outputsObject[output.name] = {
+          type: output.type,
+          description: output.description,
+          ...(output.default ? { default: output.default } : {})
+        };
+      });
+
+      console.log('outputsObject', outputsObject);
+  
       const newTask: Task = {
-        id: 0,
+        id: 0, // This will be set by the server
         name: values.taskId,
         description: values.description,
         teams: [],
-        isAtomic: true,
+        isAtomic: values.protocolType === 'atomic',
         version: values.version,
         protocolDetails: {
           enact: "1.0.0",
@@ -207,14 +233,7 @@ const AddTask = () => {
               name: values.authorName
             }
           ],
-          inputs: values.inputs.reduce((acc, input) => ({
-            ...acc,
-            [input.name]: {
-              type: input.type,
-              description: input.description || '',  // Make sure this is never undefined since it's required
-              ...(input.default !== undefined ? { default: input.default } : {})
-            }
-          }), {} as Record<string, InputConfig>),
+          inputs: inputsObject,
           tasks: [
             {
               id: values.taskId,
@@ -226,14 +245,7 @@ const AddTask = () => {
           flow: {
             steps: [{ task: values.taskId }]
           },
-          outputs: values.outputs.reduce((acc, input) => ({
-            ...acc,
-            [input.name]: {
-              type: input.type,
-              description: input.description || '',  // Make sure this is never undefined since it's required
-              ...(input.default !== undefined ? { default: input.default } : {})
-            }
-          }), {} as Record<string, InputConfig>),
+          outputs: outputsObject // Use the transformed outputs object
         }
       };
   
@@ -664,4 +676,4 @@ const AddTask = () => {
   );
 };
 
-export default AddTask;
+export default TaskForm;
