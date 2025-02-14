@@ -3,14 +3,14 @@ import Database from 'bun:sqlite';
 import { ProcessedCapability } from '../types/yaml.types';
 
 export class DatabaseService {
-  private db: Database;
+  db: Database;
 
   constructor() {
     this.db = new Database('capabilities.db');
     this.initializeDatabase();
   }
 
-  private initializeDatabase() {
+  initializeDatabase() {
     // Create capabilities table
     this.db.run(`
       CREATE TABLE IF NOT EXISTS capabilities (
@@ -24,7 +24,7 @@ export class DatabaseService {
     `);
   }
 
-  private cosineSimilarity(a: number[], b: number[]): number {
+  cosineSimilarity(a: number[], b: number[]): number {
     let dotProduct = 0;
     let normA = 0;
     let normB = 0;
@@ -146,7 +146,7 @@ export class DatabaseService {
     }
   }
 
-  private createDefaultCapability(cap: any) {
+  createDefaultCapability(cap: any) {
     return {
       id: cap.id || 0,
       name: cap.id || 'Unnamed Task',
