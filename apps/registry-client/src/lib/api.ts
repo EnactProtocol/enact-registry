@@ -1,6 +1,6 @@
 import type { CapabilityWrapper } from '@/types/protocol';
 
-const SERVER = "http://localhost:8082";
+const SERVER = import.meta.env.MODE === 'development' ? 'http://localhost:8081' : import.meta.env.SERVER;
 
 export const api = {
   tasks: {
