@@ -2,7 +2,7 @@ import app from './app';
 import figlet from "figlet";
 import logger from './logger';
 
-const port = process.env.PORT || 8080;
+export const port = process.env.PORT || 8082;
 const bannerWord1 = figlet.textSync('Enact', {
   font: 'Standard',
   horizontalLayout: 'default',

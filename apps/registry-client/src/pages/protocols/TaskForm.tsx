@@ -54,7 +54,6 @@ const TaskForm = () => {
     name: "outputs"
   });
 
-  const SERVER = "http://localhost:8080";
 
   const handleYamlUpload = async (content: string) => {
     try {

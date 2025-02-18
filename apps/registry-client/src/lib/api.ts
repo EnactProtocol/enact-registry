@@ -1,6 +1,6 @@
 import type { CapabilityWrapper } from '@/types/protocol';
 
-const SERVER = "http://localhost:8080";
+const SERVER = "http://localhost:8082";
 
 export const api = {
   tasks: {
