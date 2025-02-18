@@ -70,8 +70,10 @@ export class TaskController {
         inputs: task.protocolDetails?.inputs || {},
         tasks: task.protocolDetails?.tasks || [],
         flow: task.protocolDetails?.flow || { steps: [] },
-        outputs: task.protocolDetails?.outputs || {}
-      };
+        outputs: task.protocolDetails?.outputs || {},
+        name: task.name,
+        dependencies: task.protocolDetails?.dependencies || {  } 
+      }
   
       // Store the complete JSON string of structuredTask
       await this.dbService.storeCapability(processedCapability, JSON.stringify(structuredTask));

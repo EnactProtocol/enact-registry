@@ -12,6 +12,7 @@ import { InputConfigurationSection } from "@/components/InputConfiguration";
 import { OutputConfigurationSection } from "@/components/OutputConfiguration";
 import TaskConfigurationSection from "@/components/TaskConfigurations"
 import { formSchema, FormValues } from "@/components/types"
+import { load as yamlLoad } from 'js-yaml';
 
 const TaskForm = () => {
   const navigate = useNavigate();
@@ -57,19 +58,18 @@ const TaskForm = () => {
 
   const handleYamlUpload = async (content: string) => {
     try {
-      const response = await fetch(`${SERVER}/api/yaml/process`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ file: content }),
-        credentials: 'include',
-      });
+      // const response = await fetch(`${SERVER}/api/yaml/process`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ file: content }),
+      //   credentials: 'include',
+      // });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
-      }
-
-      let yamlContent = await response.json();
-      yamlContent = yamlContent.capability;
+      // if (!response.ok) {
+      //   throw new Error(`Server error: ${response.statusText}`);
+      // }
+      const yamlText = await content; // Get the raw text instead of calling .json()
+      const yamlContent = yamlLoad(yamlText);
       console.log("yamlContent",yamlContent);
       if (!yamlContent.enact || !yamlContent.id) {
         throw new Error('Invalid YAML: Missing required fields (enact, id)');
@@ -89,6 +89,7 @@ const TaskForm = () => {
           version: yamlContent.version || "1.0.0",
           authors: yamlContent.authors || [],
           inputs: yamlContent.inputs || {},
+          dependencies: yamlContent.dependencies || {},
           tasks: (yamlContent.tasks || []).map((task: any) => ({
             id: task.id,
             type: task.type,
@@ -103,6 +104,7 @@ const TaskForm = () => {
             }))
           },
           outputs: yamlContent.outputs || {},
+          type: "atomic"
         },
         version: ""
       };
@@ -117,11 +119,10 @@ const TaskForm = () => {
       }
 
       // Set inputs
-      const inputsArray = Object.entries(taskData.protocolDetails.inputs).map(([key, input]) => ({
-        name: key,
-        type: input.type,
-        description: input.description,
-        default: input.default || ''
+      const inputsArray = Object.entries(taskData.protocolDetails.inputs).map(([name, config]) => ({
+        name,
+        type: config.type,
+        description: config.description,
       }));
       form.setValue('inputs', inputsArray);
 
@@ -135,14 +136,13 @@ const TaskForm = () => {
       }
 
       // Set outputs
-      const outputsArray = Object.entries(taskData.protocolDetails.outputs).map(([key, output]) => ({
-        name: key,
-        type: output.type,
-        description: output.description,
-        default: output.default || ''
+      const outputsArray = Object.entries(taskData.protocolDetails.outputs).map(([name, config]) => ({
+        name,
+        type: config.type,
+        description: config.description,
       }));
       form.setValue('outputs', outputsArray);
-
+      addTask(taskData);
       toast.success('YAML loaded and processed successfully');
     } catch (error: any) {
       console.error('Error processing YAML:', error);
@@ -184,6 +184,7 @@ const TaskForm = () => {
           id: values.taskId,
           name: values.taskId,
           description: values.description,
+          dependencies: {},
           version: values.version,
           authors: [{ name: values.authorName }],
           inputs: inputsObject,
@@ -196,7 +197,8 @@ const TaskForm = () => {
           flow: {
             steps: [{ task: values.taskId }]
           },
-          outputs: outputsObject
+          outputs: outputsObject,
+          type: "atomic"
         }
       };
   

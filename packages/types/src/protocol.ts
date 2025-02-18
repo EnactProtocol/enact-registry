@@ -30,6 +30,21 @@ export interface Author {
     type: string;
     description?: string;
   }
+  interface PackageDependency {
+    name: string;
+    version: string;
+  }
+  
+  interface PythonDependencies {
+    version: string;
+    packages: PackageDependency[];
+  }
+  
+  interface Dependencies {
+    python?: PythonDependencies;
+    // Add other runtimes as needed, e.g.:
+    // node?: NodeDependencies;
+  }
   
   export interface EnactDocument {
     enact: string;
@@ -42,7 +57,8 @@ export interface Author {
     inputs: Record<string, Input>;
     tasks: Task[];
     flow: Flow;
-    outputs: Record<string, Output>; 
+    outputs: Record<string, Output>;
+    dependencies?: Dependencies;  // Optional dependencies field
   }
   
   export interface TaskData {

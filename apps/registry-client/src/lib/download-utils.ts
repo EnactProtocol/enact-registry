@@ -35,7 +35,7 @@ export const downloadUtils = {
       type: task.isAtomic ? "atomic" : "composite",
       authors: task.protocolDetails.authors,
       inputs: task.protocolDetails.inputs,
-      tasks: task.protocolDetails.tasks,
+      tasks: task.protocolDetails.tasks.map(t => ({ ...t, type: t.type || 'default' })),
       flow: task.protocolDetails.flow,
       outputs: task.protocolDetails.outputs
     };
