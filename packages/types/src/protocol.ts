@@ -17,8 +17,9 @@ export interface Author {
     code?: string;
   }
   
-  export interface FlowStep {
-    task: string;
+  interface FlowStep {
+    task: string;  // Similar to GitHub's 'uses'
+    name?: string; // Optional descriptive name
   }
   
   export interface Flow {
@@ -30,10 +31,11 @@ export interface Author {
     description?: string;
   }
   
-  export interface ProtocolDetails {
+  export interface EnactDocument {
     enact: string;
     id: string;
     name: string;
+    type: 'composite' | 'atomic';
     description: string;
     version: string;
     authors: Author[];
@@ -48,6 +50,6 @@ export interface Author {
     name: string;
     description: string;
     isAtomic: boolean;
-    protocolDetails: ProtocolDetails;
+    protocolDetails: EnactDocument;
   }
   

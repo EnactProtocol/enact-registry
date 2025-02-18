@@ -2,7 +2,8 @@
 import { Context } from 'elysia';
 import { parse } from 'yaml';
 import { OpenAIService } from '../services/openai.service';
-import type { Capability, ProcessedCapability } from '../types/yaml.types';
+import type { ProcessedCapability } from '../types/yaml.types';
+import { EnactDocument } from '@enact/types';
 import { DatabaseService } from '../services/db.service';
 import logger from '../logger';
 
@@ -32,7 +33,7 @@ export class YamlController {
         }
 
         // Parse YAML content
-        const parsedYaml = parse(content) as Capability;
+        const parsedYaml = parse(content) as EnactDocument;
         logger.info('Successfully parsed YAML content');
         
         // Validate required fields

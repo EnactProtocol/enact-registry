@@ -1,10 +1,10 @@
-import type { Task } from '@/types/protocol';
+import type { CapabilityWrapper } from '@/types/protocol';
 
 const SERVER = "http://localhost:8080";
 
 export const api = {
   tasks: {
-    getAll: async (): Promise<Task[]> => {
+    getAll: async (): Promise<CapabilityWrapper[]> => {
       const response = await fetch(`${SERVER}/api/task`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -14,7 +14,7 @@ export const api = {
       return data;
     },
 
-    add: async (task: Task): Promise<Task> => {
+    add: async (task: CapabilityWrapper): Promise<CapabilityWrapper> => {
       const response = await fetch(`${SERVER}/api/task`, {
         method: 'POST',
         headers: {

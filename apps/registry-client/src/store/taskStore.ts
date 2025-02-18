@@ -1,14 +1,14 @@
 // Modified addTask function for TaskStore
 import { create } from 'zustand';
-import type { Task, InputConfig } from '@/types/protocol';
+import type { CapabilityWrapper, InputConfig } from '@/types/protocol';
 import { api } from '@/lib/api';
 
 interface TaskStore {
-  tasks: Task[];
+  tasks: CapabilityWrapper[];
   isLoading: boolean;
   error: string | null;
   fetchTasks: () => Promise<void>;
-  addTask: (task: Task) => Promise<void>;
+  addTask: (task: CapabilityWrapper) => Promise<void>;
   removeTask: (taskId: number) => Promise<void>;
 }
 
@@ -32,12 +32,12 @@ export const useTaskStore = create<TaskStore>((set) => ({
     }
   },
 
-  addTask: async (taskData: Task) => {
+  addTask: async (taskData: CapabilityWrapper) => {
     console.log('sending taskData:', taskData);
     set({ isLoading: true, error: null });
     try {
       // Ensure inputs and outputs are properly structured
-      const task: Task = {
+      const task: CapabilityWrapper = {
         ...taskData,
         protocolDetails: {
           ...taskData.protocolDetails,

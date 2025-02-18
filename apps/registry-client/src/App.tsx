@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/dashboard";
-import TaskForm from "./pages/protocols/create";
+import TaskForm from "./pages/protocols/TaskForm";
 import TaskTemplate from "./pages/TaskTemplate";
 import NotFound from "./pages/NotFound";
 

@@ -1,3 +1,4 @@
+import {EnactDocument} from '@enact/types';
 export type Author = {
   name: string;
 };
@@ -22,27 +23,33 @@ export type FlowStep = {
   dependencies?: string[];
 };
 
-export type ProtocolDetails = {
-  enact: string;
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  authors: Author[];
-  inputs: Record<string, InputConfig>;
-  tasks: TaskDefinition[];
-  flow: {
-    steps: FlowStep[];
-  };      
-  outputs: Record<string, InputConfig>;
-};
+// export interface EnactDocument {
+//   // Core metadata
+//   enact: string;
+//   id: string;
+//   name: string;
+//   description: string;
+//   version: string;
+//   type: 'atomic' | 'composite';
 
-export type Task = {
+//   // Authors
+//   authors: Author[];
+
+//   // Variables
+//   inputs: Record<string, InputConfig>;
+//   outputs: Record<string, InputConfig>;
+
+//   // Execution
+//   tasks: TaskDefinition[];
+//   flow:  Record<string, string>;
+// }
+
+export type CapabilityWrapper = {
   id: number;
   name: string;
   description: string;
   version: string;
   teams: string[];
   isAtomic: boolean;
-  protocolDetails: ProtocolDetails;
+  protocolDetails: EnactDocument;
 };

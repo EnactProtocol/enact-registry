@@ -1,4 +1,5 @@
 // src/types/yaml.types.ts
+import { EnactDocument } from '@enact/types';
 export interface Author {
     name: string;
   }
@@ -35,23 +36,8 @@ export interface Author {
     };
   }
   
-  export interface Capability {
-    enact: string;
-    id: string;
-    description: string;
-    version: string;
-    type: string;
-    authors: Author[];
-    inputs: {
-      [key: string]: Variable;
-    };
-    tasks: Task[];
-    flow: Flow;
-    outputs: {
-      [key: string]: Variable;
-    };
-  }
+
   
-  export interface ProcessedCapability extends Capability {
+  export interface ProcessedCapability extends EnactDocument {
     embedding: number[];
   }

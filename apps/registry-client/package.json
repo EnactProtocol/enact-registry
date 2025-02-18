@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@enact/types": "workspace:*",
     "@hookform/resolvers": "^3.10.0",
     "@iconify-json/lucide": "^1.2.25",
     "@iconify/react": "^5.2.0",
@@ -48,6 +49,7 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
     "input-otp": "^1.2.4",
+    "js-yaml": "^4.1.0",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
@@ -63,8 +65,7 @@
     "vaul": "^0.9.3",
     "yaml": "^2.7.0",
     "zod": "^3.23.8",
-    "zustand": "^5.0.3",
-    "@enact/types": "workspace:*"
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

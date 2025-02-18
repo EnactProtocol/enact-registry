@@ -12,14 +12,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTaskStore } from "@/store/taskStore";
-import type { Task } from "@/types/protocol";
+import type { CapabilityWrapper } from "@/types/protocol";
 import { Icon } from "@iconify/react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-const EnactCard = ({ task }: { task: Task }) => {
+import { downloadUtils } from "@/lib/download-utils"
+const EnactCard = ({ task }: { task: CapabilityWrapper }) => {
   const removeTask = useTaskStore((state) => state.removeTask);
 
   // Ensure protocolDetails exists before accessing
@@ -183,6 +184,17 @@ const EnactCard = ({ task }: { task: Task }) => {
 </div>
             <div className="h-px bg-gray-400/30 mt-4" />
             <div className="flex items-center gap-2 mt-4">
+            <Button
+  variant="outline"
+  size="sm"
+  className="flex-1 flex items-center gap-2 justify-center bg-[#BCBCBC] text-black border border-gray-700 hover:bg-[#CFCFCF] hover:text-black"
+  onClick={() => downloadUtils.downloadYAML(task)}
+>
+  <Icon icon="lucide:download" className="w-4 h-4" />
+  Download YAML
+</Button>
+
+
               <Button
                 variant="outline"
                 size="sm"
