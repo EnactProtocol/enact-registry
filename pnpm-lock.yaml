@@ -281,8 +281,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(elysia@1.2.12(@sinclair/typebox@0.34.16)(typescript@5.7.3))
       '@enact/types':
-        specifier: workspace:*
-        version: link:../../packages/types
+        specifier: ./packages/types
+        version: link:packages/types
       '@sinclair/typebox':
         specifier: ^0.34.16
         version: 0.34.16
@@ -307,6 +307,9 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.7.3
+      yaml:
+        specifier: ^2.3.1
+        version: 2.7.0
     devDependencies:
       bun-types:
         specifier: latest
