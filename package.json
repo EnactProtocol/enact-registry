@@ -1,6 +1,11 @@
 {
   "name": "enact",
   "private": true,
+  "workspaces": [
+    "apps/registry-client",
+    "apps/registry-server",
+    "packages/types"
+  ],
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",

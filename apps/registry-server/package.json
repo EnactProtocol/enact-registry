@@ -2,15 +2,15 @@
   "name": "registry-server",
   "version": "1.0.0",
   "scripts": {
-    "start": "bun run src/server.ts",
     "dev": "bun --watch run src/server.ts",
     "test": "bun test",
-    "test:watch": "bun test --watch"
+    "test:watch": "bun test --watch",
+    "build": "bun build src/server.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
     "@elysiajs/static": "^1.2.0",
-    "@enact/types": "./packages/types",
+    "@enact/types": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.6.1",
     "@sinclair/typebox": "^0.34.16",
     "@types/figlet": "^1.7.0",
