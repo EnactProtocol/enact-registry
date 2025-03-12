@@ -12,7 +12,8 @@
     "test": "turbo test",
     "start": "turbo start",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "link-bun": "./bun-link.sh"
   },
   "devDependencies": {
     "prettier": "^3.5.0",
