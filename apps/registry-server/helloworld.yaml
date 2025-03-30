@@ -1,0 +1,41 @@
+enact: "1.0.0"
+id: "hello-world"
+description: "A simple Hello World capability that greets the user"
+version: "1.0.0"
+type: "python"
+
+authors:
+  - name: "Example Author"
+    email: "author@example.com"
+
+doc: |
+  # Hello World Capability
+  
+  This is a simple capability that demonstrates the basic structure of an Enact capability.
+  It takes an optional name parameter and returns a greeting message.
+
+inputs:
+  type: "object"
+  properties:
+    name:
+      type: "string"
+      description: "Name of the person to greet"
+      default: "World"
+  required: []
+
+dependencies:
+  packages: []
+
+run: |
+  def main(inputs):
+      name = inputs.get("name", "World")
+      message = f"Hello, {name}!"
+      return {"message": message}
+
+outputs:
+  type: "object"
+  properties:
+    message:
+      type: "string"
+      description: "The greeting message"
+  required: ["message"]

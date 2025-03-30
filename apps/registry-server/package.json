@@ -1,11 +1,12 @@
 {
   "name": "registry-server",
   "version": "1.0.0",
+  "types": "module",
   "scripts": {
     "dev": "bun --watch run src/server.ts",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "build": "bun build src/server.ts"
+    "build": "bun build src/server.ts --target=node --outfile dist/build.js"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
