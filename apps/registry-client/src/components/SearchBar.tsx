@@ -1,33 +1,30 @@
-import { Search } from "lucide-react";
+import { useState, KeyboardEvent } from 'react';
 
 interface SearchBarProps {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  className?: string;
+  onSearch: (query: string) => void;
 }
 
-export const SearchBar = ({ value, onChange, placeholder = "Search tasks...", className = "" }: SearchBarProps) => {
+const SearchBar = ({ onSearch }: SearchBarProps) => {
+  const [query, setQuery] = useState('');
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onSearch(query);
+    }
+  };
+
   return (
-    <div className="relative">
-      <Search 
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-700" 
-        size={20}
-      />
+    <div className="search-bar">
       <input
         type="text"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className={`
-          w-full pl-12 pr-4 py-3 rounded-lg
-          bg-[#ddddde] border border-transparent
-          focus:border-enact-accent/30 focus:outline-none
-          text-black placeholder-gray-700
-          transition-all duration-200
-          ${className}
-        `}
+        placeholder="Search capabilities..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyPress={handleKeyPress}
       />
+      <button onClick={() => onSearch(query)}>Search</button>
     </div>
   );
 };
+
+export default SearchBar;

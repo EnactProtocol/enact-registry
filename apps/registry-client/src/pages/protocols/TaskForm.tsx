@@ -6,13 +6,13 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { Icon } from "@iconify/react";
 import { useTaskStore } from "@/store/taskStore";
 import { toast } from "sonner";
-import { CapabilityWrapper, InputConfig } from "@/types/protocol";
 import { BasicInformationSection } from "@/components/BasicInformation";
 import { InputConfigurationSection } from "@/components/InputConfiguration";
 import { OutputConfigurationSection } from "@/components/OutputConfiguration";
-import TaskConfigurationSection from "@/components/TaskConfigurations"
-import { formSchema, FormValues } from "@/components/types"
+import TaskConfigurationSection from "@/components/TaskConfigurations";
+import { formSchema, FormValues } from "@/components/types";
 import { load as yamlLoad } from 'js-yaml';
+import { CapabilityWrapper, EnactDocument, JsonSchema } from "@enact/types";
 
 const TaskForm = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const TaskForm = () => {
         description: "", // required
         default: "" // optional
       }],
-    } satisfies FormValues // This ensures the defaultValues match our type exactly
+    } satisfies FormValues
   });
 
   const { fields: inputFields, append: appendInput, remove: removeInput } = useFieldArray<FormValues>({
@@ -54,93 +54,109 @@ const TaskForm = () => {
     name: "outputs"
   });
 
-
   const handleYamlUpload = async (content: string) => {
     try {
-      // const response = await fetch(`${SERVER}/api/yaml/process`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ file: content }),
-      //   credentials: 'include',
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error(`Server error: ${response.statusText}`);
-      // }
-      const yamlText = await content; // Get the raw text instead of calling .json()
-      const yamlContent = yamlLoad(yamlText);
-      console.log("yamlContent",yamlContent);
+      const yamlText = await content; 
+      const yamlContent = yamlLoad(yamlText) as any;
+      console.log("yamlContent", yamlContent);
+      
       if (!yamlContent.enact || !yamlContent.id) {
         throw new Error('Invalid YAML: Missing required fields (enact, id)');
       }
 
+      // Create a capability from the YAML
       const taskData: CapabilityWrapper = {
         id: yamlContent.id,
         name: yamlContent.id,
         description: yamlContent.description || "",
         teams: [],
         isAtomic: yamlContent.type === "atomic",
+        version: yamlContent.version || "1.0.0",
         protocolDetails: {
           enact: yamlContent.enact,
           id: yamlContent.id,
-          name: yamlContent.id,
           description: yamlContent.description || "",
           version: yamlContent.version || "1.0.0",
+          type: yamlContent.type || "atomic",
           authors: yamlContent.authors || [],
-          inputs: yamlContent.inputs || {},
-          dependencies: yamlContent.dependencies || {},
-          tasks: (yamlContent.tasks || []).map((task: any) => ({
+          // Updated to use new schema format
+          inputs: yamlContent.inputs || { 
+            type: "object", 
+            properties: {},
+            required: [] 
+          },
+          dependencies: yamlContent.dependencies || undefined,
+          tasks: yamlContent.tasks?.map((task: any) => ({
             id: task.id,
             type: task.type,
             language: task.language,
             code: task.code,
-            description: task.description
-          })),
+            dependencies: task.dependencies
+          })) || [],
+          imports: yamlContent.imports || [],
           flow: {
-            steps: (yamlContent.flow?.steps || []).map((step: any) => ({
-              task: step.task,
+            steps: yamlContent.flow?.steps?.map((step: any) => ({
+              capability: step.capability || step.task, // Handle both schema versions
+              inputs: step.inputs,
               dependencies: step.dependencies
-            }))
+            })) || []
           },
-          outputs: yamlContent.outputs || {},
-          type: "atomic"
-        },
-        version: ""
+          // Updated to use new schema format
+          outputs: yamlContent.outputs || {
+            type: "object",
+            properties: {},
+            required: []
+          },
+          env: yamlContent.env
+        }
       };
 
       // Update form values
-      form.setValue('taskId', taskData.name);
+      form.setValue('taskId', taskData.id.toString());
       form.setValue('description', taskData.description);
       form.setValue('version', taskData.protocolDetails.version);
+      form.setValue('protocolType', taskData.protocolDetails.type);
 
       if (taskData.protocolDetails.authors?.[0]) {
         form.setValue('authorName', taskData.protocolDetails.authors[0].name);
       }
 
-      // Set inputs
-      const inputsArray = Object.entries(taskData.protocolDetails.inputs).map(([name, config]) => ({
-        name,
-        type: config.type,
-        description: config.description,
-      }));
-      form.setValue('inputs', inputsArray);
+      // Set inputs (changed to use the new JSON Schema format)
+      if (taskData.protocolDetails.inputs?.properties) {
+        const inputsArray = Object.entries(taskData.protocolDetails.inputs.properties).map(([name, schema]) => ({
+          name,
+          type: (schema as JsonSchema).type || "string",
+          description: (schema as JsonSchema).description || "",
+          default: (schema as JsonSchema).default?.toString() || ""
+        }));
+        
+        if (inputsArray.length > 0) {
+          form.setValue('inputs', inputsArray);
+        }
+      }
 
-      // Set task details
+      // Set task details if this is an atomic capability
       if (taskData.protocolDetails.tasks?.[0]) {
         const firstTask = taskData.protocolDetails.tasks[0];
-        form.setValue('taskId', firstTask.id);
         form.setValue('taskType', firstTask.type);
         form.setValue('taskLanguage', firstTask.language || '');
         form.setValue('taskCode', firstTask.code || '');
       }
 
-      // Set outputs
-      const outputsArray = Object.entries(taskData.protocolDetails.outputs).map(([name, config]) => ({
-        name,
-        type: config.type,
-        description: config.description,
-      }));
-      form.setValue('outputs', outputsArray);
+      // Set outputs (changed to use the new JSON Schema format)
+      if (taskData.protocolDetails.outputs?.properties) {
+        const outputsArray = Object.entries(taskData.protocolDetails.outputs.properties).map(([name, schema]) => ({
+          name,
+          type: (schema as JsonSchema).type || "string",
+          description: (schema as JsonSchema).description || "",
+          default: (schema as JsonSchema).default?.toString() || ""
+        }));
+        
+        if (outputsArray.length > 0) {
+          form.setValue('outputs', outputsArray);
+        }
+      }
+      
       addTask(taskData);
       toast.success('YAML loaded and processed successfully');
     } catch (error: any) {
@@ -151,24 +167,38 @@ const TaskForm = () => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Convert inputs array to object format
-      const inputsObject: Record<string, InputConfig> = {};
+      // Convert inputs array to JSON Schema format
+      const inputsSchema: Record<string, JsonSchema> = {};
+      const requiredInputs: string[] = [];
+      
       values.inputs.forEach((input) => {
-        inputsObject[input.name] = {
-          type: input.type,
-          description: input.description,
-          ...(input.default ? { default: input.default } : {})
-        };
+        if (input.name) {
+          inputsSchema[input.name] = {
+            type: input.type,
+            description: input.description,
+            ...(input.default ? { default: input.default } : {})
+          };
+          // Add to required list if there's no default value
+          if (!input.default) {
+            requiredInputs.push(input.name);
+          }
+        }
       });
 
-      // Convert outputs array to object format
-      const outputsObject: Record<string, InputConfig> = {};
+      // Convert outputs array to JSON Schema format
+      const outputsSchema: Record<string, JsonSchema> = {};
+      const requiredOutputs: string[] = [];
+      
       values.outputs.forEach((output) => {
-        outputsObject[output.name] = {
-          type: output.type,
-          description: output.description,
-          ...(output.default ? { default: output.default } : {})
-        };
+        if (output.name) {
+          outputsSchema[output.name] = {
+            type: output.type,
+            description: output.description,
+            ...(output.default ? { default: output.default } : {})
+          };
+          // Add to required list
+          requiredOutputs.push(output.name);
+        }
       });
 
       const newTask: CapabilityWrapper = {
@@ -181,23 +211,37 @@ const TaskForm = () => {
         protocolDetails: {
           enact: "1.0.0",
           id: values.taskId,
-          name: values.taskId,
           description: values.description,
-          dependencies: {},
           version: values.version,
+          type: values.protocolType === 'atomic' ? 'atomic' : 'composite',
           authors: [{ name: values.authorName }],
-          inputs: inputsObject,
-          tasks: [{
-            id: values.taskId,
-            type: values.taskType,
-            language: values.taskLanguage,
-            code: values.taskCode
-          }],
-          flow: {
-            steps: [{ task: values.taskId }]
+          // Updated inputs to use JSON Schema format
+          inputs: {
+            type: "object",
+            properties: inputsSchema,
+            required: requiredInputs
           },
-          outputs: outputsObject,
-          type: "atomic"
+          // Updated outputs to use JSON Schema format
+          outputs: {
+            type: "object",
+            properties: outputsSchema,
+            required: requiredOutputs
+          },
+          // Only include tasks for atomic types
+          ...(values.protocolType === 'atomic' ? {
+            tasks: [{
+              id: values.taskId,
+              type: values.taskType as "script" | "request" | "agent" | "prompt" | "shell",
+              language: values.taskLanguage,
+              code: values.taskCode
+            }]
+          } : {}),
+          // Include flow for both types
+          flow: {
+            steps: values.protocolType === 'atomic' ? 
+              [{ capability: values.taskId }] :
+              [] // For composite types, this would be populated with multiple steps
+          }
         }
       };
   
