@@ -64,6 +64,7 @@ function App() {
       
       if (data.results && data.results.length > 0) {
         // Convert search results to capability format
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const searchResults = data.results.map((result: any) => ({
           id: result.id,
           description: result.description,

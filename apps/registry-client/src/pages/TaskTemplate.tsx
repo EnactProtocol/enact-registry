@@ -6,36 +6,27 @@ import { Icon } from "@iconify/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TEMPLATE = `enact: 1.0.0
-id: "HelloWorldCapability"
-description: "A simple hello world example"
-version: "1.0.0"
-type: "atomic"
+id: GetDogFacts
+description: Retrieves interesting facts about dogs from the Dog API
+version: 1.0.0
+type: javascript
 authors:
-  - name: "Example Author"
+  - name: Enact Team
+    email: team@example.com
 
 inputs:
-  name:
-    type: "string"
-    description: "Name to greet"
-    default: "World"
+  type: object
+  properties:
+    limit:
+      type: integer
+      description: Number of facts to retrieve
+      default: 1
+      minimum: 1
+      maximum: 10
+  required: []
 
-tasks:
-  - id: sayHello
-    type: "script"
-    language: "python"
-    code: |
-      name = inputs.get('name', 'World')
-      print(f"Hello, {name}!")
-
-flow:
-  steps:
-    - task: sayHello
-
-outputs:
-   name:
-    type: "string"
-    description: "Name to greet"
-    default: "World"`
+run: code
+  `
 
 const TaskTemplate = () => {
   const navigate = useNavigate();
