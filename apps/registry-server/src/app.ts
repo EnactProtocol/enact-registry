@@ -16,7 +16,7 @@ try {
 
 const app = new Elysia()
     .use(cors({
-        origin: ['http://localhost:3002', 'http://127.0.0.1:5501'], 
+        origin: ['http://localhost:3002', 'http://127.0.0.1:5501', `https://registry.enactprotocol.com`], 
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
         credentials: true,
     }))

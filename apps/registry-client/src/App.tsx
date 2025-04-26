@@ -9,7 +9,7 @@ import UploadPanel from './components/UploadPanel'
 import CapabilityModal from './components/CapabilityModal'
 
 // Base URL for API
-const API_BASE_URL = 'http://localhost:8081/api';
+const API_BASE_URL = import.meta.env.VITE_REGISTRY;
 
 function App() {
   // State
@@ -33,7 +33,7 @@ function App() {
   const loadCapabilities = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/registry`);
+      const response = await fetch(`${API_BASE_URL}api/registry`);
       const data = await response.json();
       
       if (data.capabilities && data.capabilities.length > 0) {
@@ -59,7 +59,7 @@ function App() {
     
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/registry/search?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_BASE_URL}/api/registry/search?q=${encodeURIComponent(query)}`);
       const data = await response.json();
       
       if (data.results && data.results.length > 0) {
@@ -103,7 +103,7 @@ function App() {
         loading: true
       });
       
-      const response = await fetch(`${API_BASE_URL}/capabilities/${id}?raw=true`);
+      const response = await fetch(`${API_BASE_URL}/api/capabilities/${id}?raw=true`);
       
       if (response.ok) {
         const content = await response.text();
@@ -134,7 +134,7 @@ function App() {
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}/registry/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/registry/${id}`, {
         method: 'DELETE'
       });
       
@@ -155,7 +155,7 @@ function App() {
   // Upload capability
   const uploadCapability = async (content: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/capabilities`, {
+      const response = await fetch(`${API_BASE_URL}/api/capabilities`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
