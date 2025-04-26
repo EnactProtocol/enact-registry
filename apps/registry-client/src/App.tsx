@@ -33,7 +33,7 @@ function App() {
   const loadCapabilities = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}api/registry`);
+      const response = await fetch(`${API_BASE_URL}/api/registry`);
       const data = await response.json();
       
       if (data.capabilities && data.capabilities.length > 0) {
