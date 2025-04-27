@@ -54,7 +54,7 @@ const CapabilityList = ({ capabilities, loading, onView, onDelete }: CapabilityL
               <div>
                 <span className="capability-name">{protocolDetails.id}</span>
                 <span className={`capability-type atomic`}>
-                  {'Atomic'}
+                  {'verified'}
                 </span>
               </div>
               <span className="capability-version">v{protocolDetails.version || '1.0.0'}</span>
